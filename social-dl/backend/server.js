@@ -103,25 +103,19 @@ function validateUrl(url) {
 // ─── yt-dlp Helpers ────────────────────────────────────────────────────────
 const { execSync } = require("child_process");
 
-// Auto-install yt-dlp if not found
-let YT_DLP = process.env.YT_DLP_PATH || "yt-dlp";
+let YT_DLP = process.env.YT_DLP_PATH || "/app/yt-dlp";
 try {
   execSync(`${YT_DLP} --version`, { stdio: "ignore" });
 } catch {
-  console.log("yt-dlp not found, installing...");
-  try {
-    execSync("pip install yt-dlp", { stdio: "inherit" });
-    YT_DLP = "yt-dlp";
-  } catch {
-    try {
-      execSync("pip3 install yt-dlp", { stdio: "inherit" });
-      YT_DLP = "yt-dlp";
-    } catch {
-      execSync("python3 -m pip install yt-dlp", { stdio: "inherit" });
-      YT_DLP = "yt-dlp";
-    }
-  }
+  console.log("Downloading yt-dlp binary...");
+  execSync(
+    `curl -L https://github.com/yt-dlp/yt-dlp/releases/latest/download/yt-dlp -o /app/yt-dlp && chmod +x /app/yt-dlp`,
+    { stdio: "inherit" }
+  );
+  YT_DLP = "/app/yt-dlp";
+  console.log("yt-dlp installed successfully!");
 }
+
 
 /**
  * Fetch video/audio metadata without downloading.
