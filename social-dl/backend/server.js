@@ -13,36 +13,7 @@ const app = express();
 const PORT = process.env.PORT || 3001;
 
 // ─── yt-dlp path ───────────────────────────────────────────────────────────
-let YT_DLP = "/tmp/yt-dlp";
-// Force sync download before anything else
-try {
-  execSync(`/tmp/yt-dlp --version`, { stdio: "ignore" });
-} catch {
-  execSync(
-    `curl -L https://github.com/yt-dlp/yt-dlp/releases/latest/download/yt-dlp -o /tmp/yt-dlp && chmod +x /tmp/yt-dlp`,
-    { stdio: "pipe", timeout: 120000 }
-  );
-}
-YT_DLP = "/tmp/yt-dlp";
-
-// Download yt-dlp before server starts
-console.log("Checking yt-dlp...");
-try {
-  execSync(`${YT_DLP} --version`, { stdio: "ignore" });
-  console.log("yt-dlp already exists at " + YT_DLP);
-} catch {
-  console.log("Downloading yt-dlp binary...");
-  try {
-    execSync(
-      `curl -L https://github.com/yt-dlp/yt-dlp/releases/latest/download/yt-dlp -o /tmp/yt-dlp && chmod +x /tmp/yt-dlp`,
-      { stdio: "inherit", timeout: 120000 }
-    );
-    YT_DLP = "/tmp/yt-dlp";
-    console.log("yt-dlp downloaded successfully!");
-  } catch (e) {
-    console.error("Failed to download yt-dlp:", e.message);
-  }
-}
+let YT_DLP = process.env.YT_DLP_PATH || "yt-dlp";
 
 // ─── Middleware ────────────────────────────────────────────────────────────
 app.use(express.json());
