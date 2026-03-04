@@ -562,8 +562,28 @@ app.use((err, req, res, next) => {
 });
 
 // ─── Start ─────────────────────────────────────────────────────────────────
+// ─── Start ─────────────────────────────────────────────────────────────────
+// Download yt-dlp BEFORE starting server
+console.log("Checking yt-dlp...");
+try {
+  execSync(`/app/yt-dlp --version`, { stdio: "ignore" });
+  YT_DLP = "/app/yt-dlp";
+  console.log("yt-dlp found!");
+} catch {
+  console.log("Downloading yt-dlp binary...");
+  try {
+    execSync(
+      `curl -L https://github.com/yt-dlp/yt-dlp/releases/latest/download/yt-dlp -o /app/yt-dlp && chmod +x /app/yt-dlp`,
+      { stdio: "inherit", timeout: 60000 }
+    );
+    YT_DLP = "/app/yt-dlp";
+    console.log("yt-dlp ready!");
+  } catch(e) {
+    console.error("Failed to download yt-dlp:", e.message);
+  }
+}
+
 app.listen(PORT, () => {
   console.log(`\n🚀 Social Media Downloader API running on http://localhost:${PORT}`);
   console.log(`   Health check: http://localhost:${PORT}/api/health\n`);
-  ensureYtDlp(); // Download yt-dlp after server starts
 });
