@@ -11,7 +11,7 @@
 const express = require("express");
 const cors = require("cors");
 const rateLimit = require("express-rate-limit");
-const { execFile, spawn } = require("child_process");
+const { execFile, spawn, execSync } = require("child_process");
 const { promisify } = require("util");
 const path = require("path");
 const fs = require("fs");
@@ -101,8 +101,6 @@ function validateUrl(url) {
 }
 
 // ─── yt-dlp Helpers ────────────────────────────────────────────────────────
-const { execSync, execFile } = require("child_process");
-
 let YT_DLP = process.env.YT_DLP_PATH || "/app/yt-dlp";
 
 // Download yt-dlp binary in background after server starts
