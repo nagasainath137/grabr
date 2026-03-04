@@ -101,7 +101,6 @@ function validateUrl(url) {
 }
 
 // ─── yt-dlp Helpers ────────────────────────────────────────────────────────
-const os = require("os");
 let YT_DLP = "/app/yt-dlp";
 const YT_DLP_FALLBACK = path.join(os.tmpdir(), "yt-dlp");
 
