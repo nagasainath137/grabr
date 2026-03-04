@@ -101,12 +101,13 @@ function validateUrl(url) {
 }
 
 // ─── yt-dlp Helpers ────────────────────────────────────────────────────────
-let YT_DLP = process.env.YT_DLP_PATH || "/app/yt-dlp";
+let YT_DLP = "/app/yt-dlp";
 
 // Download yt-dlp binary in background after server starts
 function ensureYtDlp() {
   try {
-    execSync(`${YT_DLP} --version`, { stdio: "ignore" });
+    execSync(`/app/yt-dlp --version`, { stdio: "ignore" });
+    YT_DLP = "/app/yt-dlp";
     console.log("yt-dlp found!");
   } catch {
     console.log("Downloading yt-dlp binary...");
@@ -122,7 +123,6 @@ function ensureYtDlp() {
     }
   }
 }
-
 
 /**
  * Fetch video/audio metadata without downloading.
