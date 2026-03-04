@@ -101,7 +101,9 @@ function validateUrl(url) {
 }
 
 // ─── yt-dlp Helpers ────────────────────────────────────────────────────────
+const os = require("os");
 let YT_DLP = "/app/yt-dlp";
+const YT_DLP_FALLBACK = path.join(os.tmpdir(), "yt-dlp");
 
 // Download yt-dlp binary in background after server starts
 function ensureYtDlp() {
@@ -565,23 +567,39 @@ app.use((err, req, res, next) => {
 // ─── Start ─────────────────────────────────────────────────────────────────
 // Download yt-dlp BEFORE starting server
 console.log("Checking yt-dlp...");
-try {
-  execSync(`/app/yt-dlp --version`, { stdio: "ignore" });
-  YT_DLP = "/app/yt-dlp";
-  console.log("yt-dlp found!");
-} catch {
-  console.log("Downloading yt-dlp binary...");
+const ytDlpPaths = ["/app/yt-dlp", os.tmpdir() + "/yt-dlp", "/tmp/yt-dlp"];
+
+// Check if already exists in any path
+let found = false;
+for (const p of ytDlpPaths) {
   try {
-    execSync(
-      `curl -L https://github.com/yt-dlp/yt-dlp/releases/latest/download/yt-dlp -o /app/yt-dlp && chmod +x /app/yt-dlp`,
-      { stdio: "inherit", timeout: 60000 }
-    );
-    YT_DLP = "/app/yt-dlp";
-    console.log("yt-dlp ready!");
-  } catch(e) {
-    console.error("Failed to download yt-dlp:", e.message);
+    execSync(`${p} --version`, { stdio: "ignore" });
+    YT_DLP = p;
+    found = true;
+    console.log(`yt-dlp found at ${p}`);
+    break;
+  } catch {}
+}
+
+if (!found) {
+  console.log("Downloading yt-dlp binary...");
+  for (const p of ytDlpPaths) {
+    try {
+      execSync(
+        `curl -L https://github.com/yt-dlp/yt-dlp/releases/latest/download/yt-dlp -o ${p} && chmod +x ${p}`,
+        { stdio: "inherit", timeout: 120000 }
+      );
+      execSync(`${p} --version`, { stdio: "ignore" });
+      YT_DLP = p;
+      console.log(`yt-dlp installed at ${p}`);
+      break;
+    } catch(e) {
+      console.log(`Failed at ${p}: ${e.message}`);
+    }
   }
 }
+
+console.log("Using YT_DLP:", YT_DLP);
 
 app.listen(PORT, () => {
   console.log(`\n🚀 Social Media Downloader API running on http://localhost:${PORT}`);
