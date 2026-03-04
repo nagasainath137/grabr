@@ -14,6 +14,16 @@ const PORT = process.env.PORT || 3001;
 
 // ─── yt-dlp path ───────────────────────────────────────────────────────────
 let YT_DLP = "/tmp/yt-dlp";
+// Force sync download before anything else
+try {
+  execSync(`/tmp/yt-dlp --version`, { stdio: "ignore" });
+} catch {
+  execSync(
+    `curl -L https://github.com/yt-dlp/yt-dlp/releases/latest/download/yt-dlp -o /tmp/yt-dlp && chmod +x /tmp/yt-dlp`,
+    { stdio: "pipe", timeout: 120000 }
+  );
+}
+YT_DLP = "/tmp/yt-dlp";
 
 // Download yt-dlp before server starts
 console.log("Checking yt-dlp...");
