@@ -101,19 +101,28 @@ function validateUrl(url) {
 }
 
 // ─── yt-dlp Helpers ────────────────────────────────────────────────────────
-const { execSync } = require("child_process");
+const { execSync, execFile } = require("child_process");
 
 let YT_DLP = process.env.YT_DLP_PATH || "/app/yt-dlp";
-try {
-  execSync(`${YT_DLP} --version`, { stdio: "ignore" });
-} catch {
-  console.log("Downloading yt-dlp binary...");
-  execSync(
-    `curl -L https://github.com/yt-dlp/yt-dlp/releases/latest/download/yt-dlp -o /app/yt-dlp && chmod +x /app/yt-dlp`,
-    { stdio: "inherit" }
-  );
-  YT_DLP = "/app/yt-dlp";
-  console.log("yt-dlp installed successfully!");
+
+// Download yt-dlp binary in background after server starts
+function ensureYtDlp() {
+  try {
+    execSync(`${YT_DLP} --version`, { stdio: "ignore" });
+    console.log("yt-dlp found!");
+  } catch {
+    console.log("Downloading yt-dlp binary...");
+    try {
+      execSync(
+        `curl -L https://github.com/yt-dlp/yt-dlp/releases/latest/download/yt-dlp -o /app/yt-dlp && chmod +x /app/yt-dlp`,
+        { stdio: "inherit", timeout: 60000 }
+      );
+      YT_DLP = "/app/yt-dlp";
+      console.log("yt-dlp ready!");
+    } catch(e) {
+      console.error("Failed to download yt-dlp:", e.message);
+    }
+  }
 }
 
 
@@ -558,4 +567,5 @@ app.use((err, req, res, next) => {
 app.listen(PORT, () => {
   console.log(`\n🚀 Social Media Downloader API running on http://localhost:${PORT}`);
   console.log(`   Health check: http://localhost:${PORT}/api/health\n`);
+  ensureYtDlp(); // Download yt-dlp after server starts
 });
